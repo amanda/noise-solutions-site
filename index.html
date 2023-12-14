@@ -9,12 +9,12 @@
 		<script src="notes.js"></script>
 		<script>
 			let nIntervId;
-			const synth = new Tone.Synth().toDestination();
-			function playAirplane(altitude, lat, lon, planeLat, planeLon, i) {
-				const note = createNoteFromPlane(altitude);
-				const vel = createVelocityFromPlane(lat, lon, planeLat, planeLon, 15);
-				console.log("note: ", note, "velocity: ", vel);
-				synth.triggerAttack(note, 5, velocity=vel);
+			const synth = new Tone.PolySynth().toDestination();
+			let planeChord = [];
+			synth.set({ detune: -1200 });
+			function playAirplane() {
+				console.log(planeChord.filter(note => note !== undefined))
+				synth.triggerAttackRelease(planeChord.filter(note => note !== undefined), 5);
 			}
 			function play() {
 				const lat = Number(localStorage.getItem("latitude"));
@@ -22,13 +22,16 @@
 				console.log(lat, lon)
 				getPlanesAroundMe(lat, lon).then(data => {
 					planes = data.plane_data.ac;
-					console.log(planes);
+					planeChord = [];
 					for (let i=0; i<planes.length; i++) {
 						if (planes[i].nav_altitude_mcp) {
-							playAirplane(planes[i].nav_altitude_mcp, lat, lon, planes[i].lat, planes[i].lon, i);
+							const note = createNoteFromPlane(planes[i].nav_altitude_mcp);
+							const vel = createVelocityFromPlane(lat, lon, planes[i].lat, planes[i].lon, 15);
+							console.log("note: ", note, "velocity: ", vel);
+							planeChord.push(note)
 						}
 					}
-				})
+				}).then(() => playAirplane())
 			};
 			function success(position) {
 				const latitude = position.coords.latitude;
