@@ -1,0 +1,66 @@
+<!DOCTYPE HTML>
+<html>
+	<head>	
+		<meta charset="utf-8" />
+		<title>~~~~~~~~~</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<!-- LOAD Tone.js from unpkg -->
+		<script src="http://unpkg.com/tone"></script>
+		<script src="notes.js"></script>
+		<script>
+			let nIntervId;
+			const synth = new Tone.Synth().toDestination();
+			function playAirplane(altitude, lat, lon, planeLat, planeLon, i) {
+				const note = createNoteFromPlane(altitude);
+				const vel = createVelocityFromPlane(lat, lon, planeLat, planeLon, 15);
+				console.log("note: ", note, "velocity: ", vel);
+				synth.triggerAttack(note, 5, velocity=vel);
+			}
+			function play() {
+				const lat = Number(localStorage.getItem("latitude"));
+				const lon = Number(localStorage.getItem("longitude"));
+				console.log(lat, lon)
+				getPlanesAroundMe(lat, lon).then(data => {
+					planes = data.plane_data.ac;
+					console.log(planes);
+					for (let i=0; i<planes.length; i++) {
+						if (planes[i].nav_altitude_mcp) {
+							playAirplane(planes[i].nav_altitude_mcp, lat, lon, planes[i].lat, planes[i].lon, i);
+						}
+					}
+				})
+			};
+			function success(position) {
+				const latitude = position.coords.latitude;
+				const longitude = position.coords.longitude;
+				localStorage.setItem("latitude", latitude);
+				localStorage.setItem("longitude", longitude);
+			}
+			function error() {
+				console.log("Unable to retrieve your location");
+			}
+			if (!navigator.geolocation) {
+				console.log("Geolocation is not supported by your browser");
+			} else {
+				navigator.geolocation.getCurrentPosition(success, error);
+			}
+			function start() {
+				if (!nIntervId) {
+					nIntervId = setInterval(play, 5000);
+				}
+			}
+			function stopIt() {
+				clearInterval(nIntervId);
+				// release our intervalID from the variable
+				nIntervId = null;
+				synth.triggerRelease();
+			}
+		</script>
+
+	</head>
+	<body>
+		<button id="play" onclick=start()>click to start</button>
+		<button id="stop" onclick=stopIt()>click to stop</button>
+		<div id="status"></div>
+	</body>
+</html>
