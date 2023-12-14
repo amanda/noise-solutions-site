@@ -9,9 +9,13 @@
 		<script src="notes.js"></script>
 		<script>
 			let nIntervId;
-			const synth = new Tone.PolySynth().toDestination();
+			const chorus = new Tone.Chorus(4, 2.5, 0.5).toDestination().start();
+			const synth = new Tone.PolySynth().connect(chorus);
 			let planeChord = [];
 			synth.set({ detune: -1200 });
+			// const filter = new Tone.AutoFilter(4).start();
+			// const distortion = new Tone.Distortion(0.5);
+			// synth.chain(distortion, filter, Tone.Destination);
 			function playAirplane() {
 				console.log(planeChord.filter(note => note !== undefined))
 				synth.triggerAttackRelease(planeChord.filter(note => note !== undefined), 5);

@@ -29,7 +29,7 @@ function createNoteFromPlane(altitude) {
 
 function createVelocityFromPlane(my_lat, my_lon, plane_lat, plane_lon, fence_distance) {
     const planeDistance = haversineDistance(my_lat, my_lon, plane_lat, plane_lon) // TODO this is bigger than geofence bc sphere :/
-    return mapValue(planeDistance, 0, fence_distance, 1, 0);
+    return mapValue(planeDistance, 0, fence_distance, 0, 1);
 }
 
 async function getPlanesAroundMe(lat, lon, fence=DISTANCE) {
